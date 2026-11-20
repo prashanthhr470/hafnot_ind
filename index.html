@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>HAFNOT order</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #fff; color: #222; margin: 0; padding: 24px 16px; text-align: center; }
+  h1 { font-size: 22px; margin: 8px 0 4px; }
+  p { color: #555; margin: 6px 0; }
+  .buy { color: #12813a; } .sell { color: #c62828; }
+  button { margin-top: 18px; font-size: 18px; padding: 14px 28px; border: 0; border-radius: 10px; background: #387ed1; color: #fff; }
+  @media (prefers-color-scheme: dark) { body { background: #121212; color: #eee; } p { color: #aaa; } }
+</style>
+</head>
+<body>
+<h1 id="what">Opening Kite…</h1>
+<p>Kite opens with the order filled in. <b>Set your quantity, check it, then confirm.</b></p>
+<p>Nothing is placed until you confirm in Kite.</p>
+<form id="basket" method="post" action="https://kite.zerodha.com/connect/basket">
+  <input type="hidden" name="api_key" id="api_key">
+  <input type="hidden" name="data" id="data">
+  <button type="submit" id="go">Open in Kite</button>
+</form>
+<script>
+  // The link looks like: page/#k=API_KEY&t=TICKER&s=BUY (the part after # never leaves the phone except to Kite)
+  var q = new URLSearchParams(location.hash.slice(1));
+  var key = q.get("k") || "", t = (q.get("t") || "").toUpperCase(), s = q.get("s") === "SELL" ? "SELL" : "BUY";
+  var ok = key && /^[A-Z0-9&_-]{1,30}$/.test(t);
+  var what = document.getElementById("what");
+  if (!ok) {
+    what.textContent = "This order link is incomplete";
+    document.getElementById("go").style.display = "none";
+  } else {
+    what.textContent = (s === "BUY" ? "🟢 BUY " : "🔴 SELL ") + t + " · MIS · market";
+    what.className = s === "BUY" ? "buy" : "sell";
+    document.getElementById("api_key").value = key;
+    document.getElementById("data").value = JSON.stringify([{
+      variety: "regular", exchange: "NSE", tradingsymbol: t, transaction_type: s,
+      order_type: "MARKET", product: "MIS", quantity: 1, readonly: false, tag: "hafnot"
+    }]);
+    setTimeout(function () { document.getElementById("basket").submit(); }, 600);
+  }
+</script>
+</body>
+</html>
